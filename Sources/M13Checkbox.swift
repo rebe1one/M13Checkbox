@@ -292,22 +292,27 @@ open class M13Checkbox: UIControl {
      - parameter checkState: The new state of the checkbox.
      - parameter animated: Whether or not to animate the change.
      */
-    open func setCheckState(_ newState: CheckState, animated: Bool) {
+    open func setCheckState(_ newState: CheckState, animated: Bool, completion: (() -> Void)? = nil) {
         if checkState == newState {
             return
         }
         
         if animated {
             if enableMorphing {
-                controller.animate(checkState, toState: newState)
+                controller.animate(checkState, toState: newState, completion: {
+                    completion?()
+                })
             } else {
                 controller.animate(checkState, toState: nil, completion: { [weak self] in
                     self?.controller.resetLayersForState(newState)
-                    self?.controller.animate(nil, toState: newState)
+                    self?.controller.animate(nil, toState: newState, completion: {
+                        completion?()
                     })
+                })
             }
         } else {
             controller.resetLayersForState(newState)
+            completion?()
         }
     }
     
